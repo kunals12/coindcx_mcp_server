@@ -1,12 +1,20 @@
-use crate::coindcx::service::CoinDcxService;
+use crate::mcp::coindcx_server::CoindcxMcpServer;
+use rmcp::ServiceExt;
 
 mod coindcx;
 mod config;
+mod mcp;
 mod reqwest;
 
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
-    let balance = CoinDcxService::get_futures_wallets().await;
-    dbg!(&balance);
+    let transport = (tokio::io::stdin(), tokio::io::stdout());
+
+    CoindcxMcpServer::new()
+        .serve(transport)
+        .await
+        .expect("Failed to start MCP server")
+        .waiting()
+        .await
+        .expect("MCP server exited with error");
 }
